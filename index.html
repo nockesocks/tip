@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#161826">
+<title>Buy the dev a coffee</title>
+<style>
+  /* Colours are the Cryptic app's dark theme (its values-night/colors.xml): dark only, purple accent, rounded cards. */
+  :root { color-scheme: dark; --bg: #161826; --card: #232532; --tile: #2C2F40; --line: #3F424D; --icon-bg: #2B2741;
+          --fg: #E9E9ED; --mute: #9397AB; --accent: #9184D9; --accent-soft: #B5ABFC; --on-accent: #161826; }
+  * { box-sizing: border-box; }
+  /* The app's background is flat --bg; the page adds a faint wash of the app's "section" blue (#262A60) from the top left. */
+  html { min-height: 100%; background: linear-gradient(160deg, #1C1F38 0%, var(--bg) 60%) fixed var(--bg); }
+  body { margin: 0; padding: 32px 16px 48px; color: var(--fg); font: 16px/1.45 Roboto, system-ui, sans-serif; }
+  main { max-width: 26rem; margin: 0 auto; text-align: center; }
+  header { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  /* The title as the app's SheenText draws it: 34sp bold, a gradient accent → accent_light → accent with a near-white
+     band (sheen #F5F4FF) in the middle of a 3x-wide strip. The strip slides once so the band crosses the word and
+     comes to rest on its left third (accent, rising to accent_light, easing back). */
+  h1 { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: .02em; margin: 0; color: var(--accent);
+       background: linear-gradient(90deg, #9184D9 0%, #B5ABFC 20%, #9184D9 44%, #F5F4FF 50%, #9184D9 56%, #B5ABFC 80%, #9184D9 100%) 0 0 / 300% 100%;
+       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+       animation: sheen 1.3s cubic-bezier(.2, .7, .3, 1) .4s backwards; }
+  @keyframes sheen { from { background-position: 100% 0; } to { background-position: 0 0; } }
+  @media (prefers-reduced-motion: reduce) { h1 { animation: none; } }
+  .app-icon { flex: none; width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: var(--icon-bg); color: var(--accent-soft); display: grid; place-items: center; }
+  .app-icon svg[viewBox="18 18 72 72"] { width: 100%; height: 100%; }
+  .card.fit { width: fit-content; margin: 0 auto; padding: 14px 32px 14px 20px; }
+  .card.fit .chosen { gap: 20px; }
+  h2 { font-size: 1rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-soft); margin: 24px 0; }  /* same gap above and below every label */
+  hr { border: 0; height: 1px; background: var(--accent); opacity: .7; width: 87%; margin: 28px auto 4px; }  /* the app's thin accent rule; 28px clear above and below */
+  p { margin: 0; }
+  .mute { color: var(--mute); font-size: .9rem; }
+  .card { background: var(--card); border-radius: 14px; padding: 16px; }  /* radii as in the app: cards 14, buttons 10, tiles 12 */
+  .icon { flex: none; width: 52px; height: 52px; border-radius: 10px; background: var(--icon-bg); color: var(--accent-soft); display: grid; place-items: center; }
+  svg { width: 28px; height: 28px; fill: currentColor; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 10px; }  /* equal rows: Monero as tall as the two-line buttons */
+  #xmr { grid-column: 1 / -1; justify-self: center; width: calc(50% - 5px); }  /* centred under the two Bitcoin options */
+  small { display: block; font-size: .8rem; font-weight: 400; opacity: .75; }
+  button:disabled { opacity: .45; cursor: default; }
+  button, a.button { font: inherit; font-weight: 500; min-height: 52px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;
+                     background: var(--tile); color: var(--fg); cursor: pointer; text-decoration: none; display: grid; place-items: center; text-align: center; }
+  button.primary, a.button.primary, button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  button.cup { gap: 4px; padding: 12px 8px; color: var(--mute); border-radius: 12px; }
+  button.cup svg { color: var(--accent-soft); }
+  button.link { min-height: 0; padding: 4px; border: 0; background: none; color: var(--accent-soft); font-size: .9rem; font-weight: 400; text-decoration: underline; margin-left: 12px; }
+  :focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+  .chosen { display: flex; gap: 16px; align-items: center; }
+  .chosen strong { font-size: 1.6rem; font-weight: 500; }
+  code { display: block; margin-top: 12px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; overflow-wrap: anywhere; font: .78rem/1.4 ui-monospace, monospace; color: var(--mute); }
+  #qr { max-width: 15rem; margin: 14px auto 0; background: #fff; padding: 10px; border-radius: 12px; }
+  #qr svg { display: block; width: 100%; height: auto; }
+  #status:empty { display: none; }
+  #status { margin-top: 12px; }
+  #hint { margin: 12px 8px 0; font-size: .8rem; }
+  #hint:empty { display: none; }
+  #detail { margin-bottom: 12px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="app-icon" id="head-icon"></div>
+    <h1 id="app-name"></h1>
+  </header>
+  <hr>
+
+  <h2>Buy the dev a coffee</h2>
+  <div class="card" id="tip-card">
+    <div class="chosen" id="chosen">
+      <div class="icon" id="chosen-icon"></div>
+      <strong id="chosen-amount"></strong>
+      <button type="button" class="link" id="change">Different amount</button>
+    </div>
+    <div class="row" id="amounts" role="group" aria-label="Amount in US dollars" hidden></div>
+  </div>
+
+  <div id="pay">
+    <h2>Using</h2>
+    <div class="card">
+      <div class="grid" role="group" aria-label="Pay with">
+        <button type="button" id="btc">Bitcoin<small>Lightning</small></button>
+        <button type="button" id="onchain">Bitcoin<small>On-chain</small></button>
+        <button type="button" id="xmr">Monero</button>
+      </div>
+      <p class="mute" id="status" role="status" aria-live="polite"></p>
+    </div>
+    <p class="mute" id="hint"></p>
+  </div>
+
+  <section id="request" hidden>
+    <hr>
+    <h2 id="request-label"></h2>
+    <div class="card">
+      <p id="detail"></p>
+      <div class="row">
+        <a class="button primary" id="open">Open in wallet</a>
+        <button type="button" id="copy">Copy</button>
+      </div>
+      <div id="qr" role="img" aria-label="QR code for this payment"></div>
+      <code id="text"></code>
+    </div>
+  </section>
+
+  <noscript><p class="mute">This page needs JavaScript to create a payment request.</p></noscript>
+</main>
+
+<script src="qrcode.js"></script>
+<script>
+"use strict";
+// Everything that may change lives here. The app only knows this page's address, so moving the API
+// or changing an address is one commit to this file, never an app release.
+const CONFIG = {
+  api: "https://tip.nocke.me",   // the tip API; if it cannot be reached, only Monero works (address without an amount)
+  apps: { cryptic: "Cryptic", shopyap: "ShopYap", lcrypt: "lcrypt" },
+  monero: { "": "85LaF2PbFxsaSvu447ErsNUqsHwpggbLuNtWCQGApcTk67zj1ddQA9YSUJQnoZb63qifHnxZBmmcweNeBHByzp7pSHwVo4g" },  // subaddress per app key; "" is the default
+};
+// Local review only: a page served from this machine talks to the API on this machine.
+if (["localhost", "127.0.0.1"].includes(location.hostname)) CONFIG.api = "http://127.0.0.1:8788";
+
+// One cup per amount, as on the app's About page: to-go cup, cup and saucer, iced cup with a straw.
+const CUPS = {
+  1: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v2H7zM6 6h12l-1.2 14.5a1.5 1.5 0 0 1-1.5 1.5H8.7a1.5 1.5 0 0 1-1.5-1.5z"/></svg>',
+  3: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10h11v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 11h1.5a2.5 2.5 0 0 1 0 5H16v-1.5h1.5a1 1 0 0 0 0-2H16zM4 20.5h13V22H4z"/><path d="M8 4c1 1-1 2 0 3.5M11.5 4c1 1-1 2 0 3.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+  5: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2l1 .5-2 4.5h-1.2zM6.5 9a5.5 4 0 0 1 11 0zM5.5 10h13v1.5h-13zM6.5 12.5h11l-1.2 8a1.5 1.5 0 0 1-1.5 1.5H9.2a1.5 1.5 0 0 1-1.5-1.5z"/></svg>',
+};
+
+// The app's launcher icon, as its circular Android mask shows it (from the app's ic_launcher drawables).
+const ICONS = {
+  cryptic: '<svg viewBox="18 18 72 72" role="img" aria-label="Cryptic icon"><defs><linearGradient id="cb" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="108" y2="108"><stop stop-color="#262A60"/><stop offset="1" stop-color="#161826"/></linearGradient><linearGradient id="cl" gradientUnits="userSpaceOnUse" x1="30" y1="49" x2="78" y2="83"><stop stop-color="#B5ABFC"/><stop offset="1" stop-color="#796CBF"/></linearGradient></defs><path d="M0 0h108v108H0z" fill="url(#cb)"/><g transform="translate(0 -.99) translate(54 54) scale(.66) translate(-54 -54)"><path d="M42 51V43a12 12 0 0 1 24 0V51" stroke="#B5ABFC" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M37 49h34a7 7 0 0 1 7 7v20a7 7 0 0 1-7 7h-34a7 7 0 0 1-7-7v-20a7 7 0 0 1 7-7z" fill="url(#cl)"/><path d="M54 58a4.5 4.5 0 0 1 2.4 8.3l1.1 7.2h-7l1.1-7.2A4.5 4.5 0 0 1 54 58z" fill="#161826"/><circle cx="70" cy="77" r="2" fill="#7BC8A4"/></g></svg>',
+};
+
+// Small print under the payment options: what the chosen option produces and what must not be sent to it.
+// `start` is the beginning of the real invoice or address once there is one.
+const HINTS = {
+  btc: (start) => `Lightning invoice, starting ${start || "lnbc"}… Pay it from a Lightning wallet. It can't be paid as an ordinary (on-chain) Bitcoin transfer.`,
+  onchain: (start) => `Bitcoin address, starting ${start || "bc1"}… Send Bitcoin on-chain only: not Lightning, and no other coin or network. Your wallet adds the network fee.`,
+  xmr: (start) => `Monero address, starting ${start || "8"}… Send Monero (XMR) only.`,
+};
+
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const appKey = Object.hasOwn(CONFIG.apps, params.get("app")) ? params.get("app") : "";
+const appName = appKey ? CONFIG.apps[appKey] : "";
+const moneroAddress = CONFIG.monero[appKey] || CONFIG.monero[""] || "";
+let amount = Object.hasOwn(CUPS, params.get("amount")) ? params.get("amount") : "";  // "" = not chosen yet
+let choosing = !amount;
+const LABELS = { btc: "Bitcoin Lightning", onchain: "Bitcoin On-chain", xmr: "Monero" };
+const METHODS = ["btc", "onchain", "xmr"];  // the API's asset names
+let request = 0;  // counts requests so a slow answer never overwrites a newer choice
+
+function el(tag, text, attrs = {}) {
+  const node = document.createElement(tag);
+  node.textContent = text;
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+  return node;
+}
+
+// The amount the link asked for is shown as chosen; "Different amount" swaps in the three cups.
+function render() {
+  request++;
+  document.title = amount ? `Tip $${amount}${appName ? " · " + appName : ""}` : "Buy the dev a coffee";
+  $("tip-card").classList.toggle("fit", !choosing);
+  $("chosen").hidden = choosing;
+  $("amounts").hidden = !choosing;
+  $("pay").hidden = choosing;
+  $("request").hidden = true;
+  $("status").textContent = "";
+  if (amount) {
+    $("chosen-icon").innerHTML = CUPS[amount];  // constant markup from CUPS
+    $("chosen-amount").textContent = `$${amount}`;
+  }
+  for (const id of METHODS) $(id).className = "";  // nothing is chosen, and nothing shows below, until the donor picks
+  $("hint").textContent = "";
+}
+
+function show(asset, uri, text, detail, qrText) {
+  $("hint").textContent = HINTS[asset](text.slice(0, 10));
+  $("request-label").textContent = LABELS[asset];
+  $("detail").textContent = detail;
+  $("open").href = uri;
+  $("text").textContent = text;
+  $("copy").onclick = async () => {
+    try { await navigator.clipboard.writeText(text); $("copy").textContent = "Copied"; }
+    catch { $("copy").textContent = "Select the text below"; }
+    setTimeout(() => { $("copy").textContent = "Copy"; }, 2000);
+  };
+  const qr = qrcode(0, "M");
+  qr.addData(qrText);
+  qr.make();
+  $("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });  // markup built by qrcode.js from module data only
+  $("request").hidden = false;
+  $("status").textContent = "";
+}
+
+async function ask(asset) {
+  const mine = ++request;
+  $("request").hidden = true;
+  for (const id of METHODS) $(id).className = id === asset ? "primary" : "";
+  $("hint").textContent = HINTS[asset]();
+  $("status").textContent = "Creating the request…";
+  try {
+    if (!CONFIG.api) throw new Error("no api");
+    const query = new URLSearchParams({ asset, amount, app: appKey });
+    const response = await fetch(`${CONFIG.api}/invoice?${query}`, { cache: "no-store", referrerPolicy: "no-referrer" });
+    if (!response.ok) throw new Error(String(response.status));
+    const data = await response.json();
+    if (mine !== request) return;
+    if (asset === "btc") {
+      if (!/^ln[a-z0-9]+$/i.test(data.invoice)) throw new Error("bad invoice");
+      show(asset, `lightning:${data.invoice}`, data.invoice, `Lightning invoice for $${amount}. It expires in about an hour.`,
+           `LIGHTNING:${data.invoice.toUpperCase()}`);
+    } else if (asset === "onchain") {
+      if (!/^(bc1|[13])[a-zA-Z0-9]{20,90}$/.test(data.address) || !data.uri.startsWith(`bitcoin:${data.address}`)) throw new Error("bad address");
+      show(asset, data.uri, data.address, `Bitcoin address for about $${amount}. Your wallet adds the network fee.`, data.uri);
+    } else {
+      if (!/^\d+\.\d{1,12}$/.test(data.xmr) || !moneroAddress) throw new Error("bad amount");
+      const uri = `monero:${moneroAddress}?tx_amount=${data.xmr}&tx_description=${encodeURIComponent((appName || "A") + " tip")}`;
+      show(asset, uri, moneroAddress, `${data.xmr} XMR, about $${amount} right now.`, uri);
+    }
+  } catch {
+    if (mine !== request) return;
+    if (asset === "xmr" && moneroAddress) {  // the address needs no server; only the amount is missing
+      show(asset, `monero:${moneroAddress}`, moneroAddress, "The amount in XMR could not be worked out just now. This is the Monero address.", `monero:${moneroAddress}`);
+      return;
+    }
+    $("status").textContent = "This option is not available right now. Please try again in a minute.";
+  }
+}
+
+$("head-icon").innerHTML = ICONS[appKey] || CUPS[3];  // constant markup; an app without an icon gets the cup
+$("app-name").textContent = appName || "Tip jar";
+$("amounts").replaceChildren(...Object.keys(CUPS).map((value) => {
+  const button = el("button", "", { type: "button", class: "cup", "aria-label": `$${value}` });
+  button.innerHTML = CUPS[value];  // constant markup
+  button.append(el("span", `$${value}`));
+  button.onclick = () => { amount = value; choosing = false; render(); };
+  return button;
+}));
+$("change").onclick = () => { choosing = true; render(); };
+for (const id of METHODS) $(id).onclick = () => ask(id);
+// A method with nothing behind it is hidden; on a local review copy it shows greyed out instead.
+const local = CONFIG.api.startsWith("http://127.0.0.1");
+$("xmr").hidden = !moneroAddress && !local;
+$("xmr").disabled = !moneroAddress;
+render();
+</script>
+</body>
+</html>
