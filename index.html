@@ -118,7 +118,7 @@
 // or changing an address is one commit to this file, never an app release.
 const CONFIG = {
   api: "https://tip.nocke.me",   // the tip API; if it cannot be reached, only Monero works (address without an amount)
-  apps: { cryptic: "Cryptic", shopyap: "ShopYap", lcrypt: "lcrypt" },
+  apps: { cryptic: "Cryptic", "cryptic-desktop": "Cryptic Desktop", shopyap: "ShopYap" },
   monero: { "": "85LaF2PbFxsaSvu447ErsNUqsHwpggbLuNtWCQGApcTk67zj1ddQA9YSUJQnoZb63qifHnxZBmmcweNeBHByzp7pSHwVo4g" },  // subaddress per app key; "" is the default
 };
 // Local review only: a page served from this machine talks to the API on this machine.
@@ -135,6 +135,7 @@ const CUPS = {
 const ICONS = {
   cryptic: '<svg viewBox="18 18 72 72" role="img" aria-label="Cryptic icon"><defs><linearGradient id="cb" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="108" y2="108"><stop stop-color="#262A60"/><stop offset="1" stop-color="#161826"/></linearGradient><linearGradient id="cl" gradientUnits="userSpaceOnUse" x1="30" y1="49" x2="78" y2="83"><stop stop-color="#B5ABFC"/><stop offset="1" stop-color="#796CBF"/></linearGradient></defs><path d="M0 0h108v108H0z" fill="url(#cb)"/><g transform="translate(0 -.99) translate(54 54) scale(.66) translate(-54 -54)"><path d="M42 51V43a12 12 0 0 1 24 0V51" stroke="#B5ABFC" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M37 49h34a7 7 0 0 1 7 7v20a7 7 0 0 1-7 7h-34a7 7 0 0 1-7-7v-20a7 7 0 0 1 7-7z" fill="url(#cl)"/><path d="M54 58a4.5 4.5 0 0 1 2.4 8.3l1.1 7.2h-7l1.1-7.2A4.5 4.5 0 0 1 54 58z" fill="#161826"/><circle cx="70" cy="77" r="2" fill="#7BC8A4"/></g></svg>',
 };
+ICONS["cryptic-desktop"] = ICONS.cryptic;  // same family, same padlock
 
 // Small print under the payment options: what the chosen option produces and what must not be sent to it.
 // `start` is the beginning of the real invoice or address once there is one.
