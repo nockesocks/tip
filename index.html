@@ -14,8 +14,9 @@
   * { box-sizing: border-box; }
   /* The app's background is flat --bg; the page adds a faint wash of the app's "section" blue (#262A60) from the top left. */
   html { min-height: 100%; background: linear-gradient(160deg, #1C1F38 0%, var(--bg) 60%) fixed var(--bg); }
-  body { margin: 0; padding: 32px 16px 48px; color: var(--fg); font: 16px/1.45 Roboto, system-ui, sans-serif; }
-  main { max-width: 26rem; margin: 0 auto; text-align: center; }
+  /* Column layout so the small print sits at the bottom of the window on short pages, below the content on long ones. */
+  body { margin: 0; padding: 32px 16px 20px; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; color: var(--fg); font: 16px/1.45 Roboto, system-ui, sans-serif; }
+  main { flex: 1 0 auto; width: 100%; max-width: 26rem; margin: 0 auto; text-align: center; }
   header { display: flex; flex-direction: column; gap: 10px; align-items: center; }
   /* The title as the app's SheenText draws it: 34sp bold, a gradient accent → accent_light → accent with a near-white
      band (sheen #F5F4FF) in the middle of a 3x-wide strip. The strip slides once so the band crosses the word and
@@ -62,6 +63,9 @@
   #family { margin: 0; }
   #family a { color: var(--accent-soft); }
   #detail { margin-bottom: 12px; }
+  footer { width: 100%; max-width: 26rem; margin: 40px auto 0; text-align: center; color: var(--mute); font-size: .72rem; line-height: 1.5; opacity: .8; }  /* small print */
+  footer p + p { margin-top: 6px; }
+  footer a { color: inherit; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -70,7 +74,7 @@
   <header>
     <div class="app-icon" id="head-icon"></div>
     <h1 id="app-name"></h1>
-    <p class="mute" id="family" hidden>A member of the Cryptic™ family of utilities · <a href="https://github.com/nockesocks" target="_blank" rel="noopener">see all apps</a></p>
+    <p class="mute" id="family" hidden>A member of the Cryptic family of utilities · <a href="https://github.com/nockesocks?tab=repositories&amp;q=cryptic" target="_blank" rel="noopener">see all apps</a></p>
   </header>
   <hr>
 
@@ -112,7 +116,16 @@
   </section>
 
   <noscript><p class="mute">This page needs JavaScript to create a payment request.</p></noscript>
+
 </main>
+
+<footer id="fineprint" hidden>
+  <p>The Cryptic family: <a href="https://github.com/nockesocks/cryptic-vaults" target="_blank" rel="noopener">Cryptic Vaults</a> for Linux and macOS ·
+    <a href="https://github.com/nockesocks/cryptic-vaults-android" target="_blank" rel="noopener">Cryptic Vaults for Android</a> ·
+    Cryptic Pass, coming soon · all apps on <a href="https://github.com/nockesocks?tab=repositories&amp;q=cryptic" target="_blank" rel="noopener">github.com/nockesocks</a></p>
+  <p><span id="license-app"></span> is licensed under <a id="license" target="_blank" rel="noopener"></a>.
+    Cryptic and the Cryptic padlock are trademarks of the developer.</p>
+</footer>
 
 <script src="qrcode.js"></script>
 <script>
@@ -122,7 +135,12 @@
 const CONFIG = {
   api: "https://tip.nocke.me",   // the tip API; if it cannot be reached, only Monero works (address without an amount)
   apps: { cryptic: "Cryptic", "cryptic-vaults": "Cryptic Vaults", "cryptic-vaults-android": "Cryptic Vaults for Android", shopyap: "ShopYap" },
-  monero: { "": "85LaF2PbFxsaSvu447ErsNUqsHwpggbLuNtWCQGApcTk67zj1ddQA9YSUJQnoZb63qifHnxZBmmcweNeBHByzp7pSHwVo4g" },  // subaddress per app key; "" is the default
+  licenses: {  // per Cryptic app key, shown in the small print; "cryptic" is Android v0.1.0's old key
+    cryptic: ["PolyForm Noncommercial 1.0.0", "https://github.com/nockesocks/cryptic-vaults-android/blob/main/LICENSE"],
+    "cryptic-vaults": ["GPLv3", "https://github.com/nockesocks/cryptic-vaults/blob/main/LICENSE"],
+    "cryptic-vaults-android": ["PolyForm Noncommercial 1.0.0", "https://github.com/nockesocks/cryptic-vaults-android/blob/main/LICENSE"],
+  },
+  monero: { "":"85LaF2PbFxsaSvu447ErsNUqsHwpggbLuNtWCQGApcTk67zj1ddQA9YSUJQnoZb63qifHnxZBmmcweNeBHByzp7pSHwVo4g" },  // subaddress per app key; "" is the default
 };
 // Local review only: a page served from this machine talks to the API on this machine.
 if (["localhost", "127.0.0.1"].includes(location.hostname)) CONFIG.api = "http://127.0.0.1:8788";
@@ -153,7 +171,6 @@ const params = new URLSearchParams(location.search);
 const appKey = Object.hasOwn(CONFIG.apps, params.get("app")) ? params.get("app") : "";
 const appName = appKey ? CONFIG.apps[appKey] : "";  // as the invoice names it
 const isCryptic = /^Cryptic\b/.test(appName);
-const displayName = isCryptic ? appName.replace(/^Cryptic/, "Cryptic™") : appName;  // ™ on the page only, never in invoices
 const moneroAddress = CONFIG.monero[appKey] || CONFIG.monero[""] || "";
 let amount = Object.hasOwn(CUPS, params.get("amount")) ? params.get("amount") : "";  // "" = not chosen yet
 let choosing = !amount;
@@ -171,7 +188,7 @@ function el(tag, text, attrs = {}) {
 // The amount the link asked for is shown as chosen; "Different amount" swaps in the three cups.
 function render() {
   request++;
-  document.title = amount ? `Tip $${amount}${appName ? " · " + displayName : ""}` : "Buy the dev a coffee";
+  document.title = amount ? `Tip $${amount}${appName ? " · " + appName : ""}` : "Buy the dev a coffee";
   $("tip-card").classList.toggle("fit", !choosing);
   $("chosen").hidden = choosing;
   $("amounts").hidden = !choosing;
@@ -241,8 +258,15 @@ async function ask(asset) {
 }
 
 $("head-icon").innerHTML = ICONS[appKey] || CUPS[3];  // constant markup; an app without an icon gets the cup
-$("app-name").textContent = displayName || "Tip jar";
+$("app-name").textContent = appName || "Tip jar";
 $("family").hidden = !isCryptic;
+$("fineprint").hidden = !isCryptic;
+const license = CONFIG.licenses[appKey];
+$("license-app").parentElement.hidden = !license;
+if (license) {
+  $("license-app").textContent = appName;
+  [$("license").textContent, $("license").href] = license;
+}
 $("amounts").replaceChildren(...Object.keys(CUPS).map((value) => {
   const button = el("button", "", { type: "button", class: "cup", "aria-label": `$${value}` });
   button.innerHTML = CUPS[value];  // constant markup
